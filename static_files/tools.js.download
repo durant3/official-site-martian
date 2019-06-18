@@ -1,0 +1,615 @@
+
+/*
+
+function tools_show_id(str_id) {
+function tools_hide_id(str_id) {
+function tools_shortkey(str_string, int_len) {
+function tools_trim_float(str_asset) {
+
+*/
+
+// -------------------------------------------------------------------------
+function tools_proof_form(str_action) {
+
+	// ---
+	if(str_action == 'check_upload') {
+
+		// clean error
+		document.getElementById("form_error").innerHTML = '';
+
+		// check name
+		str_name = document.getElementById("multi_name").value;
+        if (str_name == '') {
+			document.getElementById("form_error").innerHTML = 'Invalid input, missing title!<p>';
+			return false;
+        }
+	}
+}
+// -------------------------------------------------------------------------
+function tools_window_adjust() { // check mobile screen
+
+	var w = window,
+		d = document,
+		e = d.documentElement,
+		g = d.getElementsByTagName('body')[0],
+		x = w.innerWidth || e.clientWidth || g.clientWidth,
+		y = w.innerHeight|| e.clientHeight|| g.clientHeight;
+	//alert(x + ' × ' + y);
+	if(x < 601) {
+		document.getElementById("menu_desktop").style.display = "none";
+		document.getElementById("menu_mobile1").style.display = "block";
+		document.getElementById("menu_mobile2").style.display = "block";
+	} else {
+		document.getElementById("menu_desktop").style.display = "block";
+		document.getElementById("menu_mobile1").style.display = "none";
+		document.getElementById("menu_mobile2").style.display = "none";
+	}
+}
+
+// -------------------------------------------------------------------------
+function readTextFile(file, div_id)
+{
+    var rawFile = new XMLHttpRequest();
+    rawFile.open("GET", file, false);
+    rawFile.onreadystatechange = function ()
+    {
+        if(rawFile.readyState === 4)
+        {
+            if(rawFile.status === 200 || rawFile.status == 0)
+            {
+                var allText = rawFile.responseText;
+				document.getElementById(div_id).innerHTML = allText;
+            }
+        }
+    }
+    return rawFile.send(null);
+}
+
+// -------------------------------------------------------------------------
+function tools_month_lastdate(str_date) {
+
+	// !!! important: we don't care about UTC-timing here as with calc of last day of month its not relevant
+	var str_date_min_utc = str_date.substring(0, 10)+'T00:00:00Z';
+	var date_tmp = new Date(str_date_min_utc);
+
+	// get last day in month (by adding 1 month and then set 0 for last day in previous month)
+	var d = new Date(date_tmp.getFullYear(), date_tmp.getMonth()+1, 0);
+
+	var str_month = ""+(d.getMonth()+1); // add 1 to month, as in JS 00->Jan => we get correct month for server/php format
+	if(str_month < 10) {
+		str_month = "0"+str_month;
+	}
+
+	var str_day = ""+(d.getDate());
+	if(str_day < 10) {
+		str_day = "0"+str_day;
+	}
+
+	str_date = d.getFullYear()+'-'+str_month+'-'+str_day+' 00:00:00';
+	return str_date;
+}
+
+// -------------------------------------------------------------------------
+function tools_substr_count(string, subString, allowOverlapping) {
+
+    string += "";
+    subString += "";
+    if (subString.length <= 0) return (string.length + 1);
+
+    var n = 0,
+        pos = 0,
+        step = allowOverlapping ? 1 : subString.length;
+
+    while (true) {
+        pos = string.indexOf(subString, pos);
+        if (pos >= 0) {
+            ++n;
+            pos += step;
+        } else break;
+    }
+    return n;
+}
+
+// -------------------------------------------------------------------------
+function tools_removeNewlines(str) {
+
+	if(str == "" || str == "undefined") {
+		return str;
+	}
+
+	//remove line breaks from str
+	str = str.replace(/\s{2,}/g, ' ');
+	str = str.replace(/\t/g, ' ');
+	str = str.toString().trim().replace(/(\r\n|\n|\r)/g,"");
+	//console.log(str);
+
+	return str;
+}
+
+// -------------------------------------------------------------------------
+function tools_trim_linebreak(str) {
+
+	str = str.replace("\r\n", "");
+	str = str.replace("\n", "");
+	str = str.replace("\r", "");
+
+  return str;
+}
+
+// -------------------------------------------------------------------------
+function tools_ltrim_zero(str_main) {
+  return str_main.replace(/^0+/,"");
+}
+
+// -------------------------------------------------------------------------
+function tools_date2timestamp(str_date) { // e.g. 2019-01-20 12:12:12
+
+	var str_year = 	str_date.substring(0, 4);
+	var str_month = str_date.substring(5, 7);
+	str_month = str_month -1; // be carefull in javascript 0->January, 01->Feb, ...
+	var str_day = 	str_date.substring(8, 10);
+	var str_hour = 	str_date.substring(11, 13);
+	var str_min = 	str_date.substring(14, 16);
+	var str_sec = 	str_date.substring(17, 19);
+
+	var someDate = new Date(str_year, str_month, str_day, str_hour, str_min, str_sec, 0);
+	var utc_timestamp = Date.UTC(someDate.getFullYear(),someDate.getMonth(), someDate.getDate(), someDate.getHours(), someDate.getMinutes(), someDate.getSeconds(), 0);
+	return utc_timestamp/1000|0; // (devide by 1000 to get the right number for stellar)
+
+	//str_date_new = (someDate.getTime())/1000|0; // getTime delivers UNIX-time in milliseconds /1000 // 15474204000 , 1547420400000
+};
+
+// -------------------------------------------------------------------------
+function tools_UTC_date_now() {
+
+	var date = new Date();
+//	var now_utc =  Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(),
+//	date.getUTCHours(), date.getUTCMinutes(), date.getUTCSeconds());
+	var now_utc =  Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), 0, 0, 0);
+
+	// !!! note: if you display a date with ".toString" is displays your local time, always use ".toISOString"
+	//isd = new Date(now_utc).toISOString();	alert(isd);
+	return new Date(now_utc);
+}
+
+// -------------------------------------------------------------------------
+function tools_date_now(int_add_days) {
+
+	var d = tools_UTC_date_now(); // don't use new Date(); !!!
+	if(Number.isInteger(int_add_days)) {
+		d.setDate(d.getDate() + int_add_days);
+	}
+
+	var str_month = ""+(d.getUTCMonth()+1); // add 1 to month, as in JS 00->Jan => we get correct month for server/php format
+	if(str_month < 10) {
+		str_month = "0"+str_month;
+	}
+
+	var str_day = ""+(d.getUTCDate());
+	if(str_day < 10) {
+		str_day = "0"+str_day;
+	}
+
+	var str_h = ""+(d.getUTCHours());
+	if(str_h < 10) {
+		str_h = "0"+str_h;
+	}
+
+	var str_min = ""+(d.getUTCMinutes());
+	if(str_min < 10) {
+		str_min = "0"+str_min;
+	}
+
+	var str_sec = ""+(d.getUTCSeconds());
+	if(str_sec < 10) {
+		str_sec = "0"+str_sec;
+	}
+
+	str_date = d.getUTCFullYear()+'-'+str_month+'-'+str_day+' '+str_h+':'+str_min+':'+str_sec;
+//	alert('3: '+str_date);
+
+	return str_date;
+}
+
+// -------------------------------------------------------------------------
+function tools_date_weekday(str_date_min) {
+
+	// check if weekday?
+	var str_date_min_utc = str_date_min.substring(0, 10)+'T00:00:00Z'; // Z = UTC time
+	var date_tmp = new Date(str_date_min_utc);
+
+	if(date_tmp.getDay() != 6 && date_tmp.getDay() != 0) { // Sat, Sun
+		return true; // is weekday
+	} else {
+		return false; // is weekend
+	}
+}
+
+// -------------------------------------------------------------------------
+function tools_date_getweekday(str_date_min) {
+
+	// check if weekday?
+	var str_date_min_utc = str_date_min.substring(0, 10)+'T00:00:00Z';
+	var date_tmp = new Date(str_date_min_utc);
+
+	return date_tmp.getDay();
+}
+
+
+// -------------------------------------------------------------------------
+function tools_addDays(date_utc, int_days) { // 2019-01-24T00:00:00Z -> ...T...Z to use UTC time as base
+
+	//var date_millisec = tools_addDays('2019-01-24T00:00:00Z', 1); //
+	var date_millisec = Date.parse(date_utc); //
+	var int_day_millisec = int_days * (1000 * 60 * 60 * 24);
+
+	date_millisec = date_millisec + int_day_millisec; // 1548374400000 1548370800000
+
+	var date_new = new Date(date_millisec);
+	//alert('1: '+date_new);
+
+  	var str_month = ""+(date_new.getUTCMonth()+1); // add 1 to month, as in JS 00->Jan => we get correct month for server/php format
+	if(str_month < 10) {
+		str_month = "0"+str_month;
+	}
+
+	var str_day = ""+(date_new.getUTCDate());
+	if(str_day < 10) {
+		str_day = "0"+str_day;
+	}
+
+	str_date = date_new.getUTCFullYear()+'-'+str_month+'-'+str_day+' 00:00:00';
+	//alert('1: '+str_date);
+
+  return str_date;
+}
+
+
+// -------------------------------------------------------------------------
+function occurrences(string, subString, allowOverlapping) {
+
+	// count substring occurence in string
+    string += "";
+    subString += "";
+    if (subString.length <= 0) return (string.length + 1);
+
+    var n = 0,
+        pos = 0,
+        step = allowOverlapping ? 1 : subString.length;
+
+    while (true) {
+        pos = string.indexOf(subString, pos);
+        if (pos >= 0) {
+            ++n;
+            pos += step;
+        } else break;
+    }
+    return n;
+}
+
+// -------------------------------------------------------------------------
+function rtrim(str, ch)
+{
+    for (i = str.length - 1; i >= 0; i--)
+    {
+        if (ch != str.charAt(i))
+        {
+            str = str.substring(0, i + 1);
+            break;
+        }
+    }
+    return str;
+}
+
+// -------------------------------------------------------------------------
+function tools_lastchar(str)
+{
+	i = str.length - 1;
+    return str.charAt(i);
+}
+
+// -------------------------------------------------------------------------
+function tools_clean_xlm_date(str_tmp) {
+
+	str_tmp = str_tmp.replace('Z', ' ');
+	str_tmp = str_tmp.replace('T', ' ');
+
+	return str_tmp;
+}
+
+// -----------------------------------------------------------------------
+function date_myformat(str_date, version) {
+
+	str_date2 = str_date.substring(0, 11);
+	year = str_date2.substring(0, 4);
+	month = str_date2.substring(5, 7);
+	day = str_date2.substring(8, 10);
+
+	str_time = str_date.substring(11, 19);
+	h = str_time.substring(0, 2);
+	m = str_time.substring(3, 5);
+	s = str_time.substring(6, 8);
+
+	if(version == "v1") {
+		str_new = day + "." + month + "." + year;
+	}
+	if(version == "v2") {
+		str_new = day + "." + month;
+	}
+
+	if(version == "date_time") {
+		str_new = day + "." + month + "." + year + " " + h + ":" + m;
+	}
+
+	if(version == "v3") {
+
+		if (month == '01') { month = 'Jan'; }
+		if (month == '02') { month = 'Feb'; }
+		if (month == '03') { month = 'Mar'; }
+		if (month == '04') { month = 'Apr'; }
+		if (month == '05') { month = 'May'; }
+		if (month == '06') { month = 'June'; }
+		if (month == '07') { month = 'July'; }
+		if (month == '08') { month = 'Aug'; }
+		if (month == '09') { month = 'Sept'; }
+		if (month == '10') { month = 'Oct'; }
+		if (month == '11') { month = 'Nov'; }
+		if (month == '12') { month = 'Dec'; }
+		str_new = month + " " + year;
+	}
+
+	return str_new;
+}
+
+// -----------------------------------------------------------------------
+function tools_add_time_month(str_year_month, int_month) {
+
+	var str_year = Number(str_year_month.substring(0, 4));
+	var str_month = str_year_month.substring(5, 7);
+	str_month = Number(str_month); // str_month.replace('0', '');
+	str_month_new = Number();
+
+	if(str_month == 1 && int_month == -1) {
+		str_month_new = 12;
+		str_year = str_year -1;
+	}
+	if((str_month > 1 && str_month < 12) || (str_month == 1 && int_month == 1) || (str_month == 12 && int_month == -1)) {
+		str_month_new = str_month + int_month;
+	}
+	if(str_month == 12 && int_month == 1) {
+		str_month_new = 1;
+		str_year = str_year + 1;
+	}
+
+	if(str_month_new < 10) {
+		str_month_html = "0" + str_month_new;
+	} else {
+		str_month_html = ""+str_month_new;
+	}
+	return str_year + "-" + str_month_html;
+}
+
+// -------------------------------------------------------------------------
+function tools_count_substr(string, subString, allowOverlapping) {
+
+    string += "";
+    subString += "";
+    if (subString.length <= 0) return (string.length + 1);
+
+    var n = 0,
+        pos = 0,
+        step = allowOverlapping ? 1 : subString.length;
+
+    while (true) {
+        pos = string.indexOf(subString, pos);
+        if (pos >= 0) {
+            ++n;
+            pos += step;
+        } else break;
+    }
+    return n;
+}
+
+// -------------------------------------------------------------------------
+function tools_trim_float(str_asset) {
+
+	// 14.0000 -> 14
+	if(str_asset != null) {
+		str_asset = '_'+str_asset;
+		str_asset = str_asset.replace('0.','nullp');
+		str_asset = str_asset.replace('00000000.','0.');
+		str_asset = str_asset.replace('0000000.','0.');
+		str_asset = str_asset.replace('000000.','0.');
+		str_asset = str_asset.replace('00000.','0.');
+		str_asset = str_asset.replace('0000.','0.');
+		str_asset = str_asset.replace('000.','0.');
+		str_asset = str_asset.replace('00.','0.');
+		str_asset = str_asset.replace('0.','0.');
+		str_asset = str_asset.replace('_00000000','_0');
+		str_asset = str_asset.replace('_0000000','_0');
+		str_asset = str_asset.replace('_000000','_0');
+		str_asset = str_asset.replace('_00000','_0');
+		str_asset = str_asset.replace('_0000','_0');
+		str_asset = str_asset.replace('_000','_0');
+		str_asset = str_asset.replace('_0','_');
+		str_asset = str_asset.replace('_0','_');
+		str_asset = str_asset.replace('_0','_');
+		str_asset = str_asset.replace('_0','_');
+		str_asset = str_asset.replace('_0','_');
+		str_asset = str_asset.replace('_','');
+		str_asset = str_asset.replace('nullp', '0.');
+		str_asset = str_asset.replace(/0+$/g,'');
+		str_asset = str_asset.replace(/\.+$/g,'');
+	}
+	return str_asset;
+}
+
+
+// -------------------------------------------------------------------------
+function tools_shortkey(str_string, int_len) {
+
+	var str_sub1 = str_string.substr(0, int_len);
+	var str_sub2 = str_string.substr(56-int_len, int_len);
+
+	return str_sub1+"..."+str_sub2;
+}
+
+// -------------------------------------------------------------------------
+function tools_short(str_string, int_len) {
+
+	if(str_string.length > int_len && int_len > 5) {
+		var int_str_org = str_string.length;
+		var str_sub1 = str_string.substr(0, int_len-3);
+		var str_sub2 = str_string.substr(int_str_org-int_len, int_len);
+
+		return str_sub1+"..."+str_sub2.substr(str_sub2.length-3, 3);
+	}
+
+	if(str_string.length > int_len && int_len <= 5) {
+		var int_str_org = str_string.length;
+		var str_sub1 = str_string.substr(0, int_len);
+		var str_sub2 = str_string.substr(int_str_org-int_len, int_len);
+
+		return str_sub1+"..."+str_sub2;
+	}
+
+	return str_string;
+}
+
+// -------------------------------------------------------------------------
+function tools_hide_id(str_id) {
+		document.getElementById(str_id).style.display = 'none';
+}
+
+// -------------------------------------------------------------------------
+function tools_swap_id(elementId1, elementId2) {
+
+	document.getElementById(elementId1).style.display = "block";
+	document.getElementById(elementId2).style.display = "none";
+}
+
+// -------------------------------------------------------------------------
+function tools_show_id(str_id) {
+	document.getElementById(str_id).style.display = 'block';
+}
+
+// -------------------------------------------------------------------------
+function tools_toggle_id(str_id) {
+
+	var x = document.getElementById(str_id);
+    if (x.style.display === "none") {
+        x.style.display = "table-row";
+    } else {
+        x.style.display = "none";
+    }
+}
+
+// -------------------------------------------------------------------------
+function tools_move_content(id1, id2) {
+
+	document.getElementById(id2).innerHTML = document.getElementById(id1).innerHTML;
+}
+// -------------------------------------------------------------------------
+function tools_toggle_filter(str_id) {
+
+	var x = document.getElementById(str_id);
+    if (x.className == "filter_off") {
+        x.className = "filter_on";
+		localStorage.setItem(str_id, "on");
+    } else {
+        x.className = "filter_off";
+		localStorage.setItem(str_id, "off");
+    }
+}
+
+// ------------------------------------------------------------------------- sed -i 's/copyToClipboard/tools_copyToClipboard/g'
+function tools_copyToClipboard(elementId) {
+
+  // Create an auxiliary hidden input
+  var aux = document.createElement("input");
+
+  // Get the text from the element passed into the input
+  aux.setAttribute("value", document.getElementById(elementId).innerHTML);
+
+  // Append the aux input to the body
+  document.body.appendChild(aux);
+
+  // Highlight the content
+  aux.select();
+
+  // Execute the copy command
+  document.execCommand("copy");
+
+  // Remove the input from the body
+  document.body.removeChild(aux);
+
+//  $("#"+elementId).fadeIn();
+//	$("#"+elementId).fadeOut();
+
+	$("#copied_tag").fadeIn(800);
+	$("#copied_tag").fadeOut(1400);
+
+}
+
+// ------------------------------------------------------------------------- sed -i 's/copyToClipboard/tools_copyToClipboard/g'
+function tools_info_layer(elementId) {
+
+  // Create an auxiliary hidden input
+  var aux = document.createElement("input");
+
+  // Get the text from the element passed into the input
+  aux.setAttribute("value", document.getElementById(elementId).innerHTML);
+
+  // Append the aux input to the body
+  document.body.appendChild(aux);
+
+  // Highlight the content
+  aux.select();
+
+  // Execute the copy command
+  document.execCommand("copy");
+
+  // Remove the input from the body
+  document.body.removeChild(aux);
+
+//  $("#"+elementId).fadeIn();
+//	$("#"+elementId).fadeOut();
+
+	if(elementId == 'voucher_certificate') {
+		$("#voucher_certificate").fadeIn(800);
+//		$("#voucher_certificate").fadeOut(800);
+	}
+	alert(elementId);
+	if(elementId == 'info_external_signature') {
+		$("#info_external_signature").fadeIn(800);
+//		$("#voucher_certificate").fadeOut(800);
+	}
+}
+
+// --- hidden email -------------------------------------------------------------------------------
+function mym2 () {
+	document.getElementById("mym").innerHTML = "<a href='mailto:contact@smartstellar.org'>contact@smartstellar.org</a>"; // textContent
+};
+// --- hidden email -------------------------------------------------------------------------------
+function email_blueorion(myid, str_color) {
+
+	if(myid == '') { myid = "bo_email"; }
+	document.getElementById(myid).innerHTML = "<a style='color:"+str_color+";' href='mailto:contact@blueorion.cc'>contact@blueorion.cc</a>"; // textContent
+};
+
+
+// ----------------------------------------------------------------------------------
+function js_mobile_icon() {
+  var x = document.getElementById("myLinks");
+  if (x.style.display === "block") {
+	x.style.display = "none";
+  } else {
+	x.style.display = "block";
+  }
+}
+
+// ----------------------------------------------------------------------------------
+function tools_isInt(value) {
+	var er = /^-?[0-9]+$/;
+    return er.test(value);
+}
